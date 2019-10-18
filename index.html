@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Giphy Karaoke</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.5/css/bulma.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Quicksand:300&display=swap" rel="stylesheet">
+
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: #23d160;
+            transition: background-color 0.5s ease;
+        }
+
+        .hero-input {
+            position: absolute;
+            text-align: center;
+            font-weight: 300;
+            font-size: 5rem;
+            border: 0;
+            top: 60%;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.5);
+            transition-timing-function: ease-in-out;
+            transition-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
+            transition: 0.2s;
+        }
+
+        .hero-input:focus {
+            border: 0;
+            box-shadow: none;
+        }
+        
+        .slide-image {
+            width: 100%;
+        }
+
+        .slide-title {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            bottom: 20px;
+        }
+
+        .container {
+            height: 100%;
+            width: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .is-transparent {
+            box-shadow: inset 0 1px 2px rgba(10,10,10,0);
+            border-color: rgba(181,181,181, 0);
+            background-color: rgba(255, 255, 255, 0);
+            color: rgba(54, 54, 54, 0);
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="container" id="slideContainer">
+        <form id="search">
+            <input id="q" name="q" class="input is-rounded is-transparent is-hidden hero-input" type="text" autocomplete="off"
+                autocorrect="off" autocapitalize="off" spellcheck="false">
+        </form>
+
+        <p id="slideTitle" class="slide-title has-text-white">
+            Brace yourselves 🦄🔥
+        </p>
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
+    <script>
+        const giphyAPIkey = 'pwfekJqzMgcM0JF7Mh3J4lJ67v7Xrla4'
+        const giphyAPIurl = 'http://api.giphy.com/v1/gifs/search'
+        const errorImageUrl = 'https://media0.giphy.com/media/J6DKSSrTUoSqiCuT8Z/giphy.gif?cid=47c4200bc70ab04ef19ea25dd2cff5923fa651721f13aa94&rid=giphy.gif'
+
+        const rgbToHex = (r, g, b) => '#' + [r, g, b].map(x => {
+                const hex = x.toString(16)
+                return hex.length === 1 ? '0' + hex : hex
+            }).join('')
+
+        async function handleQuery(query) {
+            let response = await fetch(`${giphyAPIurl}?api_key=${giphyAPIkey}&q=${query}`);
+            const slideImage = document.getElementById('slideContainer');
+            const slideTitle = document.getElementById('slideTitle');
+            let images = null;
+            let json = null;
+
+            if (response.ok) {
+                json = await response.json();
+                images = json.data;
+            }
+
+            if (!images || images.length === 0) {
+                slideImage.style['background-image'] = `url(${errorImageUrl})`;
+                slideTitle.innerText = 'Try again!';
+                return;
+            }
+
+            const i = Math.floor(Math.random() * images.length);
+            const giphyImageUrl = json.data[i].images.original.url;
+            const q = document.getElementById('q');
+
+            slideImage.style['background-image'] = `url(${giphyImageUrl})`;
+            slideTitle.innerText = json.data[i].title;
+            q.value = '';
+
+            const colorThief = new ColorThief();
+            const img = new Image();
+
+            img.addEventListener('load', () => {
+                let c = colorThief.getColor(img);
+                let rgbColor = rgbToHex(c[0], c[1], c[2])
+                document.body.style['background-color'] = rgbColor;
+                console.log(rgbColor);
+            })
+            img.crossOrigin = 'Anonymous';
+            img.src = giphyImageUrl
+            //console.log(giphyImageUrl);
+        }
+
+        document.addEventListener('DOMContentLoaded', e => {
+            const q = document.getElementById('q');
+            const f = document.getElementById('search')
+
+            f.addEventListener('submit', e => {
+                e.preventDefault();
+                let query = q.value
+                handleQuery(query)
+            });
+
+            document.addEventListener('keydown', event => {
+                if (event.isComposing || event.keyCode === 229)
+                    return;
+
+                if (event.keyCode === 8) {
+                    return;
+                }
+
+                if (event.keyCode <= 27) {
+                    q.addEventListener('transitionend', () => q.classList.add('is-hidden'), { once: true });
+                    q.classList.add('is-transparent');
+                    return;
+                }
+
+                if (q.classList.contains('is-hidden')) {
+                    q.value = String.fromCharCode(event.keyCode);
+                }
+
+                q.classList.remove('is-hidden');
+                setTimeout(() => {
+                    q.classList.remove('is-transparent');
+                    q.focus()
+                }, 1)
+            });
+        })
+    </script>
+</body>
+
+</html>
