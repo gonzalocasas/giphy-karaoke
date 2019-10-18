@@ -23,6 +23,7 @@
 
         .hero-input {
             position: absolute;
+            z-index: 1000;
             text-align: center;
             font-weight: 300;
             font-size: 5rem;
@@ -46,9 +47,13 @@
 
         .slide-title {
             position: absolute;
-            width: 100%;
+            background-color:rgba(0, 0, 0, 0.8);
+            color: white;
             text-align: center;
+            width: 100%;
+            padding: 1rem;
             bottom: 20px;
+            transition: 0.5s ease;
         }
 
         .container {
@@ -76,8 +81,8 @@
                 autocorrect="off" autocapitalize="off" spellcheck="false">
         </form>
 
-        <p id="slideTitle" class="slide-title has-text-white">
-            Brace yourselves 🦄🔥
+        <p id="slideTitle" class="slide-title">
+            Start typing to present! 🦄🔥
         </p>
 
     </div>
@@ -107,7 +112,7 @@
 
             if (!images || images.length === 0) {
                 slideImage.style['background-image'] = `url(${errorImageUrl})`;
-                slideTitle.innerText = 'Try again!';
+                slideTitle.innerText = 'Nothing here. Try one more time, with feeling!';
                 return;
             }
 
@@ -123,10 +128,15 @@
             const img = new Image();
 
             img.addEventListener('load', () => {
+                let fontColor = '#fff';
                 let c = colorThief.getColor(img);
                 let rgbColor = rgbToHex(c[0], c[1], c[2])
                 document.body.style['background-color'] = rgbColor;
-                console.log(rgbColor);
+                slideTitle.style['background-color'] = rgbColor;
+                if (c[0] * 0.299 + c[1] * 0.587 + c[2] * 0.114 > 186) {
+                    fontColor = '#000'
+                }
+                slideTitle.style['color'] = fontColor;
             })
             img.crossOrigin = 'Anonymous';
             img.src = giphyImageUrl
