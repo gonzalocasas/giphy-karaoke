@@ -9,3 +9,5 @@ Instant, interactive slideshow generator based on GIPHY!
 Open it, start typing, profit! 💥
 
 🌎 https://gnz.io/giphy-karaoke
+
+> Tips: press enter to repeat the last search

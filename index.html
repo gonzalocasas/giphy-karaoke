@@ -92,6 +92,7 @@
         const giphyAPIkey = 'pwfekJqzMgcM0JF7Mh3J4lJ67v7Xrla4'
         const giphyAPIurl = 'https://api.giphy.com/v1/gifs/search'
         const errorImageUrl = 'https://media0.giphy.com/media/J6DKSSrTUoSqiCuT8Z/giphy.gif?cid=47c4200bc70ab04ef19ea25dd2cff5923fa651721f13aa94&rid=giphy.gif'
+        let lastQuery = null;
 
         const rgbToHex = (r, g, b) => '#' + [r, g, b].map(x => {
                 const hex = x.toString(16)
@@ -99,6 +100,7 @@
             }).join('')
 
         async function handleQuery(query) {
+            lastQuery = query;
             let response = await fetch(`${giphyAPIurl}?api_key=${giphyAPIkey}&q=${query}`);
             const slideImage = document.getElementById('slideContainer');
             const slideTitle = document.getElementById('slideTitle');
@@ -162,6 +164,10 @@
                 }
 
                 if (event.keyCode <= 27) {
+                    if (event.keyCode === 13 && q.classList.contains('is-hidden')) {
+                        handleQuery(lastQuery)
+                        return;
+                    }
                     q.addEventListener('transitionend', () => q.classList.add('is-hidden'), { once: true });
                     q.classList.add('is-transparent');
                     return;
